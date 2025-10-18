@@ -174,7 +174,53 @@
             font-weight: bold;
         }
         
-        @media (max-width: 600px) {
+        .bingo-banner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #ffd700 0%, #ff6b35 100%);
+            color: #2d2d2d;
+            font-family: 'Creepster', cursive;
+            font-size: 72px;
+            padding: 40px 60px;
+            border-radius: 20px;
+            border: 8px solid #2d2d2d;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            z-index: 1000;
+            animation: popIn 0.5s ease forwards;
+            text-align: center;
+            letter-spacing: 8px;
+        }
+        
+        @keyframes popIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(-180deg);
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1.2) rotate(10deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+        }
+        
+        .emoji-fall {
+            position: fixed;
+            font-size: 40px;
+            z-index: 999;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+            @media (max-width: 600px) {
             body {
                 padding: 5px;
             }
@@ -228,6 +274,16 @@
             .status {
                 font-size: 14px;
                 margin-top: 15px;
+            }
+            
+            .bingo-banner {
+                font-size: 48px;
+                padding: 30px 40px;
+                letter-spacing: 4px;
+            }
+            
+            .emoji-fall {
+                font-size: 30px;
             }
         }
     </style>
@@ -369,6 +425,88 @@
                 }
             }
             saveState(markedIndices);
+            
+            // Check for bingo automatically
+            checkForBingo();
+        }
+        
+        function checkForBingo() {
+            const marked = new Set();
+            for (let i = 0; i < 25; i++) {
+                const cell = document.getElementById(`cell-${i}`);
+                if (cell.classList.contains('marked') || i === 12) {
+                    marked.add(i);
+                }
+            }
+
+            // Check rows
+            for (let row = 0; row < 5; row++) {
+                let count = 0;
+                for (let col = 0; col < 5; col++) {
+                    if (marked.has(row * 5 + col)) count++;
+                }
+                if (count === 5) {
+                    celebrateBingo();
+                    return;
+                }
+            }
+
+            // Check columns
+            for (let col = 0; col < 5; col++) {
+                let count = 0;
+                for (let row = 0; row < 5; row++) {
+                    if (marked.has(row * 5 + col)) count++;
+                }
+                if (count === 5) {
+                    celebrateBingo();
+                    return;
+                }
+            }
+
+            // Check diagonals
+            let diag1 = 0, diag2 = 0;
+            for (let i = 0; i < 5; i++) {
+                if (marked.has(i * 5 + i)) diag1++;
+                if (marked.has(i * 5 + (4 - i))) diag2++;
+            }
+            if (diag1 === 5 || diag2 === 5) {
+                celebrateBingo();
+                return;
+            }
+        }
+        
+        function celebrateBingo() {
+            // Create banner
+            const banner = document.createElement('div');
+            banner.className = 'bingo-banner';
+            banner.textContent = 'BINGO!';
+            document.body.appendChild(banner);
+            
+            // Create falling emojis
+            const emojis = ['🎃', '👻', '🦇', '🕷️', '🍬', '💀', '🕸️', '🧛'];
+            const emojiCount = 50;
+            
+            for (let i = 0; i < emojiCount; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.className = 'emoji-fall';
+                    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.left = Math.random() * 100 + '%';
+                    emoji.style.top = '-50px';
+                    emoji.style.animationDuration = (2 + Math.random() * 3) + 's';
+                    document.body.appendChild(emoji);
+                    
+                    // Remove emoji after animation
+                    setTimeout(() => {
+                        emoji.remove();
+                    }, 5000);
+                }, i * 100);
+            }
+            
+            // Remove banner after 5 seconds
+            setTimeout(() => {
+                banner.remove();
+            }, 5000);
         }
         
         function hasMarkedSquares() {
