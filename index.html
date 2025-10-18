@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halloween Movie Bingo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            background-color: #1a1a1a;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, #ff9a56 0%, #ff6b35 100%);
+            border: 5px solid #2d2d2d;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-family: 'Creepster', cursive;
+            color: #2d2d2d;
+            font-size: 42px;
+            margin: 10px 0;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.3);
+            letter-spacing: 2px;
+        }
+        
+        .decorations {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 36px;
+            margin: 15px 0;
+        }
+        
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            background-color: #2d2d2d;
+            padding: 8px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .bingo-cell {
+            background-color: #fff8e7;
+            border: 3px solid #2d2d2d;
+            border-radius: 8px;
+            padding: 10px 5px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #2d2d2d;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            user-select: none;
+        }
+        
+        .bingo-cell:hover:not(.free) {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .bingo-cell.marked {
+            background: linear-gradient(135deg, #6a0dad 0%, #9b30ff 100%);
+            color: white;
+        }
+        
+        .bingo-cell.marked::after {
+            content: '✓';
+            position: absolute;
+            font-size: 48px;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+        
+        .bingo-cell.free {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            font-size: 18px;
+            color: #2d2d2d;
+            cursor: default;
+        }
+        
+        .bingo-cell.free:hover {
+            transform: none;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background-color: #ff6b35;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: Georgia, 'Times New Roman', serif;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background-color: #ff8555;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .reset-btn {
+            background-color: #dc3545;
+        }
+        
+        .reset-btn:hover {
+            background-color: #e55565;
+        }
+        
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            color: #ff9a56;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 5px;
+            }
+            
+            .card {
+                padding: 12px;
+                margin: 0;
+                border-width: 3px;
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .decorations {
+                font-size: 18px;
+                gap: 6px;
+                margin: 8px 0;
+            }
+            
+            .bingo-grid {
+                gap: 4px;
+                padding: 4px;
+            }
+            
+            .bingo-cell {
+                font-size: 8.5px;
+                padding: 6px 2px;
+                min-height: 55px;
+                border-width: 2px;
+            }
+            
+            .bingo-cell.free {
+                font-size: 10px;
+            }
+            
+            .bingo-cell.marked::after {
+                font-size: 28px;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            button {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            
+            .status {
+                font-size: 14px;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="decorations">
+                    <span>👻</span>
+                    <span>🎃</span>
+                    <span>👻</span>
+                    <span>🎃</span>
+                    <span>👻</span>
+                </div>
+                <h1>HALLOWEEN MOVIE BINGO</h1>
+                <div class="decorations">
+                    <span>🎃</span>
+                    <span>👻</span>
+                    <span>🎃</span>
+                    <span>👻</span>
+                    <span>🎃</span>
+                </div>
+            </div>
+            <div class="bingo-grid" id="bingo-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        const squares = [
+            "Jump scare",
+            "Group splits up",
+            "Someone trips while running",
+            "Flickering lights",
+            "Character investigates strange noise",
+            "Unexplained wind",
+            "Character looks in mirror, sees something behind them",
+            "Found footage/writing",
+            "Spiders/insects",
+            "Creaky door",
+            "Demonic possession",
+            "Power goes out",
+            "Ominous music intensifies",
+            "Based on a true story",
+            "Bad omen",
+            "Bloody wound",
+            "Skeptic of supernatural events",
+            "Creepy children singing or laughing",
+            "Character's phone dies at crucial moment",
+            "Mysterious shadow or silhouette",
+            "Ominous warnings from locals ignored",
+            "Someone says 'Did you hear that?'",
+            "Graveyard or cemetery scene",
+            "Character slowly backs away from danger",
+            "Creepy doll or toy",
+            "Someone says 'Hello? Is anyone there?'",
+            "Sudden loud noise fake-out",
+            "Character refuses to leave dangerous location",
+            "Mysterious figure disappears when looked at directly",
+            "Ancient curse or legend mentioned"
+        ];
+
+        function generateDeviceId() {
+            return 'device_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+        }
+
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('halloween_bingo_device_id');
+            if (!deviceId) {
+                deviceId = generateDeviceId();
+                localStorage.setItem('halloween_bingo_device_id', deviceId);
+            }
+            return deviceId;
+        }
+
+        function seededRandom(seed) {
+            const x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function shuffleArrayWithSeed(array, seed) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(seededRandom(seed + i) * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function hashCode(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash);
+        }
+
+        function generateCard() {
+            const deviceId = getDeviceId();
+            const seed = hashCode(deviceId);
+            const shuffled = shuffleArrayWithSeed(squares, seed);
+            return shuffled.slice(0, 24);
+        }
+
+        function saveState(markedIndices) {
+            localStorage.setItem('halloween_bingo_marked', JSON.stringify(markedIndices));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('halloween_bingo_marked');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function toggleCell(index) {
+            if (index === 12) return; // Free space
+            
+            const cell = document.getElementById(`cell-${index}`);
+            cell.classList.toggle('marked');
+            
+            const markedIndices = [];
+            for (let i = 0; i < 25; i++) {
+                const c = document.getElementById(`cell-${i}`);
+                if (c.classList.contains('marked')) {
+                    markedIndices.push(i);
+                }
+            }
+            saveState(markedIndices);
+            document.getElementById('status').textContent = '';
+        }
+
+        function checkBingo() {
+            const marked = new Set();
+            for (let i = 0; i < 25; i++) {
+                const cell = document.getElementById(`cell-${i}`);
+                if (cell.classList.contains('marked') || i === 12) {
+                    marked.add(i);
+                }
+            }
+
+            // Check rows
+            for (let row = 0; row < 5; row++) {
+                let count = 0;
+                for (let col = 0; col < 5; col++) {
+                    if (marked.has(row * 5 + col)) count++;
+                }
+                if (count === 5) {
+                    document.getElementById('status').textContent = '🎉 BINGO! You got a row! 🎉';
+                    return;
+                }
+            }
+
+            // Check columns
+            for (let col = 0; col < 5; col++) {
+                let count = 0;
+                for (let row = 0; row < 5; row++) {
+                    if (marked.has(row * 5 + col)) count++;
+                }
+                if (count === 5) {
+                    document.getElementById('status').textContent = '🎉 BINGO! You got a column! 🎉';
+                    return;
+                }
+            }
+
+            // Check diagonals
+            let diag1 = 0, diag2 = 0;
+            for (let i = 0; i < 5; i++) {
+                if (marked.has(i * 5 + i)) diag1++;
+                if (marked.has(i * 5 + (4 - i))) diag2++;
+            }
+            if (diag1 === 5 || diag2 === 5) {
+                document.getElementById('status').textContent = '🎉 BINGO! You got a diagonal! 🎉';
+                return;
+            }
+
+            document.getElementById('status').textContent = 'No bingo yet... keep watching!';
+        }
+
+        function resetCard() {
+            if (confirm('Are you sure you want to reset your card? This will clear all marked squares.')) {
+                localStorage.removeItem('halloween_bingo_marked');
+                const cells = document.querySelectorAll('.bingo-cell');
+                cells.forEach(cell => cell.classList.remove('marked'));
+                document.getElementById('status').textContent = 'Card reset!';
+                setTimeout(() => {
+                    document.getElementById('status').textContent = '';
+                }, 2000);
+            }
+        }
+
+        function initCard() {
+            const cardItems = generateCard();
+            const grid = document.getElementById('bingo-grid');
+            const markedIndices = loadState();
+            
+            let itemIndex = 0;
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'bingo-cell';
+                cell.id = `cell-${i}`;
+                
+                if (i === 12) {
+                    cell.classList.add('free');
+                    cell.textContent = 'FREE SPACE';
+                } else {
+                    cell.textContent = cardItems[itemIndex];
+                    cell.onclick = () => toggleCell(i);
+                    if (markedIndices.includes(i)) {
+                        cell.classList.add('marked');
+                    }
+                    itemIndex++;
+                }
+                
+                grid.appendChild(cell);
+            }
+        }
+
+        initCard();
+    </script>
+</body>
+</html>
