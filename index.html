@@ -70,6 +70,13 @@
             margin-bottom: 20px;
         }
         
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
         .bingo-cell {
             background-color: #fff8e7;
             border: 3px solid #2d2d2d;
@@ -246,6 +253,9 @@
                 </div>
             </div>
             <div class="bingo-grid" id="bingo-grid"></div>
+            <div class="controls">
+                <button onclick="regenerateCard()">Generate New Card</button>
+            </div>
         </div>
     </div>
 
@@ -295,6 +305,15 @@
             }
             return deviceId;
         }
+        
+        function getCardSeed() {
+            let seed = localStorage.getItem('halloween_bingo_card_seed');
+            if (!seed) {
+                seed = Date.now().toString();
+                localStorage.setItem('halloween_bingo_card_seed', seed);
+            }
+            return seed;
+        }
 
         function seededRandom(seed) {
             const x = Math.sin(seed++) * 10000;
@@ -321,8 +340,8 @@
         }
 
         function generateCard() {
-            const deviceId = getDeviceId();
-            const seed = hashCode(deviceId);
+            const cardSeed = getCardSeed();
+            const seed = hashCode(cardSeed);
             const shuffled = shuffleArrayWithSeed(squares, seed);
             return shuffled.slice(0, 24);
         }
@@ -350,66 +369,36 @@
                 }
             }
             saveState(markedIndices);
-            document.getElementById('status').textContent = '';
         }
-
-        function checkBingo() {
-            const marked = new Set();
+        
+        function hasMarkedSquares() {
             for (let i = 0; i < 25; i++) {
+                if (i === 12) continue; // Skip free space
                 const cell = document.getElementById(`cell-${i}`);
-                if (cell.classList.contains('marked') || i === 12) {
-                    marked.add(i);
+                if (cell && cell.classList.contains('marked')) {
+                    return true;
                 }
             }
-
-            // Check rows
-            for (let row = 0; row < 5; row++) {
-                let count = 0;
-                for (let col = 0; col < 5; col++) {
-                    if (marked.has(row * 5 + col)) count++;
-                }
-                if (count === 5) {
-                    document.getElementById('status').textContent = '🎉 BINGO! You got a row! 🎉';
-                    return;
-                }
-            }
-
-            // Check columns
-            for (let col = 0; col < 5; col++) {
-                let count = 0;
-                for (let row = 0; row < 5; row++) {
-                    if (marked.has(row * 5 + col)) count++;
-                }
-                if (count === 5) {
-                    document.getElementById('status').textContent = '🎉 BINGO! You got a column! 🎉';
-                    return;
-                }
-            }
-
-            // Check diagonals
-            let diag1 = 0, diag2 = 0;
-            for (let i = 0; i < 5; i++) {
-                if (marked.has(i * 5 + i)) diag1++;
-                if (marked.has(i * 5 + (4 - i))) diag2++;
-            }
-            if (diag1 === 5 || diag2 === 5) {
-                document.getElementById('status').textContent = '🎉 BINGO! You got a diagonal! 🎉';
-                return;
-            }
-
-            document.getElementById('status').textContent = 'No bingo yet... keep watching!';
+            return false;
         }
-
-        function resetCard() {
-            if (confirm('Are you sure you want to reset your card? This will clear all marked squares.')) {
-                localStorage.removeItem('halloween_bingo_marked');
-                const cells = document.querySelectorAll('.bingo-cell');
-                cells.forEach(cell => cell.classList.remove('marked'));
-                document.getElementById('status').textContent = 'Card reset!';
-                setTimeout(() => {
-                    document.getElementById('status').textContent = '';
-                }, 2000);
+        
+        function regenerateCard() {
+            if (hasMarkedSquares()) {
+                if (!confirm('You have marked squares on your current card. Are you sure you want to generate a new card? This will clear your progress.')) {
+                    return;
+                }
             }
+            
+            // Generate new seed
+            localStorage.setItem('halloween_bingo_card_seed', Date.now().toString());
+            
+            // Clear marked state
+            localStorage.removeItem('halloween_bingo_marked');
+            
+            // Reload the card
+            const grid = document.getElementById('bingo-grid');
+            grid.innerHTML = '';
+            initCard();
         }
 
         function initCard() {
